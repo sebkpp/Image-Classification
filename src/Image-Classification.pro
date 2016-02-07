@@ -13,6 +13,25 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    sample.cpp \
+    group.cpp \
+    groupcontroller.cpp \
+    classificator.cpp \
+    trainer.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    sample.h \
+    group.h \
+    groupcontroller.h \
+    classificator.h \
+    trainer.h
+
+LIBS += -L/usr/local/lib \
+    -lopencv_core \
+    -lopencv_highgui \
+    -lopencv_features2d \
+    -lopencv_calib3d \
+    -lopencv_flann \
+    -lopencv_ml \
+    -lopencv_nonfree
