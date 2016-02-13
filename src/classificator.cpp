@@ -77,7 +77,7 @@ void Classificator::classificationMultipleFiles(QStringList filesToClassifier, i
 
         for(int i =0; i < this->groupNames.size();++i)
         {
-            qDebug() << this->groupController->findGroupByName(this->groupNames.at(i))->getCorrectionRate();
+            //qDebug() << this->groupController->findGroupByName(this->groupNames.at(i))->getCorrectionRate();
             correctionSum = correctionSum + this->groupController->findGroupByName(this->groupNames.at(i))->getCorrectionRate();
         }
 
