@@ -1,0 +1,6 @@
+#include "classificator.h"
+
+Classificator::Classificator()
+{
+
+}
