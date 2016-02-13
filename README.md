@@ -1,9 +1,9 @@
 #Image-Classification
 
 ## Anforderungen
-Qt 5.5
-OpenCV 2.4.10
-Bevorzugtes System: Linux
+* Qt 5.5
+* OpenCV 2.4.10
+* Bevorzugtes System: Linux
 
 ## Struktur
 * src - beinhaltet den gesamten Source-Code
