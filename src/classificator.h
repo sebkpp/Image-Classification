@@ -130,12 +130,12 @@ private:
     /**
      * @brief Liste mit vorhergesagten Gruppen
      */
-    QList<Group*> predicted;
+    QStringList groupNames;
 
     /**
      * @brief Liste mit tatsächlichen Gruppen
      */
-    QList<Group*> actual;
+    QStringList actualGroupNames;
 
 };
 

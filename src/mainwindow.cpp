@@ -80,7 +80,7 @@ void MainWindow::initView()
     QMenu * fileMenu = new QMenu(tr("file"));
     QAction *closeAction = new QAction(tr("&Close"),this);
     connect(closeAction,SIGNAL(triggered()),this,SLOT(close()));
-
+    fileMenu->addAction(closeAction);
     menubar->addMenu(fileMenu);
 
     statusBar = new QStatusBar();

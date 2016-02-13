@@ -72,7 +72,6 @@ void Group::calculateAvgColors()
     this->avgBlue = this->sumBlue/(double)normalizer;
 
     //qDebug() << "GRed: " << avgRed << "GGreen: " << avgGreen << "GBlue: " << avgBlue;
-
 }
 
 
@@ -92,7 +91,10 @@ double Group::getCorrectionRate()
             //qDebug() << "Wrong Sample";
         }
     }
-    return correctSamples / ( (double) this->samples.size());
+    if(!this->samples.isEmpty())
+        return correctSamples / ( (double) this->samples.size());
+    else
+        return 0;
 }
 
 cv::Mat Group::getFeatureHistogram()

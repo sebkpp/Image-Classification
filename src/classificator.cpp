@@ -23,8 +23,8 @@ void Classificator::classificationMultipleFiles(QStringList filesToClassifier, i
     else
     {
         // Bereinigt eventuell vorher gefüllte Listen
-        this->actual.clear();
-        this->predicted.clear();
+        this->groupNames.clear();
+        this->actualGroupNames.clear();
         this->groupController->clearSamplesFromGroups();
 
         // Initalisiert eine neue ItemListe zum Anzeigen der Bild-Dateiennamen und der vorhergesagten Gruppe
@@ -74,12 +74,14 @@ void Classificator::classificationMultipleFiles(QStringList filesToClassifier, i
 
         // Löschen?
         double correctionSum = 0;
-        for(int i =0; i < this->predicted.size();++i)
+
+        for(int i =0; i < this->groupNames.size();++i)
         {
-            correctionSum = correctionSum + this->predicted.at(i)->getCorrectionRate();
+            qDebug() << this->groupController->findGroupByName(this->groupNames.at(i))->getCorrectionRate();
+            correctionSum = correctionSum + this->groupController->findGroupByName(this->groupNames.at(i))->getCorrectionRate();
         }
 
-        this->meanRate = correctionSum / ((double) this->predicted.size());
+        this->meanRate = correctionSum / ((double) this->groupNames.size());
 
         // Setzt die Overall-CorrectionRate
         this->correctionRate = correctClassifications/ ( (double) filesToClassifier.size() );
@@ -106,18 +108,20 @@ Group* Classificator::classificationSingleFile(QString fileToClassifier, int met
     if(foundedGroup != NULL)
     {
         foundedGroup->addSamples(classSample);
-        //this->groupController->getGroups().at(id)->addSamples(classSample);
 
         // Checkt ob die tatsächliche gruppe des Test-bildes bereits in der Liste der Tatsächlichen Gruppen existiert.
-        if(!this->groupController->isGroupExistingIn(classSample->getTrueGroupName(), this->actual))
+        if(!this->actualGroupNames.contains(classSample->getTrueGroupName()))
         {
-            this->actual.append(this->groupController->findGroupByName(classSample->getTrueGroupName()));
+            this->actualGroupNames.append(classSample->getTrueGroupName());
+            if(!this->groupNames.contains(classSample->getTrueGroupName()))
+            {
+                this->groupNames.append(classSample->getTrueGroupName());
+            }
         }
 
-        // Checkt ob die gefunden Gruppe bereits in der Liste der vorhergesagten Gruppen existiert
-        if(!this->groupController->isGroupExistingIn(foundedGroup, this->predicted))
+        if(!this->groupNames.contains(foundedGroup->getName()))
         {
-            this->predicted.append(foundedGroup);
+            this->groupNames.append(foundedGroup->getName());
         }
     }
 
@@ -127,29 +131,31 @@ Group* Classificator::classificationSingleFile(QString fileToClassifier, int met
 
 QTableWidget* Classificator::getConfusionMatrix()
 {
+    //Sortiert die Listen der GruppenNamen
+    qSort(groupNames);
+    qSort(actualGroupNames);
     // Bereinigt eine eventuell vorher vorhandene Matrix
     confusionMatrix->clearContents();
     // Setzt die Zeilen und Spalten anhand der Size tatsächlichen und vorhergesagten Gruppen
-    confusionMatrix->setRowCount(this->actual.size());
-    confusionMatrix->setColumnCount(this->predicted.size());
-
-    for(int i=0;i < actual.size();++i)
+    confusionMatrix->setRowCount(this->actualGroupNames.size());
+    confusionMatrix->setColumnCount(this->groupNames.size());
+    for(int i=0;i < actualGroupNames.size();++i)
     {
         // Erstellt die Header-Spalte mit den tatsächlichen Gruppen-Namen
-        confusionMatrix->setVerticalHeaderItem(i,new QTableWidgetItem(actual.at(i)->getName()) );
+        confusionMatrix->setVerticalHeaderItem(i,new QTableWidgetItem(actualGroupNames.at(i)) );
 
         // Für die Summe der Samples
         int sum = 0;
-        for(int j = 0; j < predicted.size(); ++j)
+        for(int j = 0; j < groupNames.size(); ++j)
         {
             // Erstellt die Header-Zeile mit den vorhergesagten Gruppen-Namen
-            confusionMatrix->setHorizontalHeaderItem(j,new QTableWidgetItem(predicted.at(j)->getName()) );
+            confusionMatrix->setHorizontalHeaderItem(j,new QTableWidgetItem(groupNames.at(j)) );
 
             int count = 0;
             // Zählt durch wieviele Test-Bilder in der vorhergesagten Gruppe der tatsächlichen Gruppe entsprechen
-            for(int k = 0; k < predicted.at(j)->getSamples().size();++k)
+            for(int k= 0; k < this->groupController->findGroupByName(groupNames.at(j))->getSamples().size(); ++k)
             {
-                if(predicted.at(j)->getSamples().at(k)->getTrueGroupName() == actual.at(i)->getName())
+                if(this->groupController->findGroupByName(groupNames.at(j))->getSamples().at(k)->getTrueGroupName() == actualGroupNames.at(i))
                 {
                     count++;
                 }
@@ -158,20 +164,19 @@ QTableWidget* Classificator::getConfusionMatrix()
             sum = sum + count;
 
             QTableWidgetItem *cellItem = new QTableWidgetItem(QString::number(count));
-            if(actual.at(i)->getName() == predicted.at(j)->getName())
+            if(actualGroupNames.at(i) == groupNames.at(j))
             {
                 cellItem->setForeground(QColor("Green"));
             }
-            else if (actual.at(i)->getName() != predicted.at(j)->getName() && cellItem->text() != "0")
+            else if (actualGroupNames.at(i) != groupNames.at(j) && cellItem->text() != "0")
             {
                 cellItem->setForeground(QColor("Red"));
             }
             confusionMatrix->setItem(i,j,cellItem);
 
         }
-        for(int j = 0; j < predicted.size();++j)
+        for(int j = 0; j < groupNames.size();++j)
         {
-
            confusionMatrix->item(i,j)->setText( QString("%1%").arg (QString::number (confusionMatrix->item(i,j)->text().toDouble()*100/sum) ));
         }
     }
